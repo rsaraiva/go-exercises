@@ -9,25 +9,49 @@ import (
 	"strings"
 )
 
-type Node struct {
-	parent int32
-	left   int32
-	right  int32
-}
-
 /*
  * Complete the swapNodes function below.
  */
 func swapNodes(indexes [][]int32, queries []int32) [][]int32 {
-	return nil
+
+	var ret [][]int32
+
+	if len(queries) == 0 {
+		return append(ret, getBinaryTreeState(indexes))
+	}
+
+	indexes_ := indexes
+	for _, v := range queries {
+		indexes_ = swapIndexes(indexes_, v)
+		ret = append(ret, getBinaryTreeState(indexes_))
+	}
+
+	return ret
 }
 
-func printState(root int32, parentRoot int32, level int32, indexes [][]int32) []int32 {
+func swapIndexes(indexes [][]int32, depth int32) [][]int32 {
+	var ret [][]int32
+	for i := int32(1); i <= int32(len(indexes)); i++ {
+		if i == depth {
+			ret = append(ret, []int32{indexes[i-1][1], indexes[i-1][0]})
+		} else {
+			ret = append(ret, indexes[i-1])
+		}
+	}
+	return ret
+}
+
+func getBinaryTreeState(indexes [][]int32) []int32 {
+	root := int32(1)
+	parentRoot := int32(-1)
+
+	return walkInBinaryTree(root, parentRoot, indexes)
+}
+
+func walkInBinaryTree(root int32, parentRoot int32, indexes [][]int32) []int32 {
 	var ret []int32
 
 	node := indexes[root-1]
-
-	level++
 
 	left := node[0]
 	right := node[1]
@@ -36,13 +60,13 @@ func printState(root int32, parentRoot int32, level int32, indexes [][]int32) []
 	hasRight := right != int32(-1)
 
 	if hasLeft {
-		r := printState(left, root, level, indexes)
+		r := walkInBinaryTree(left, root, indexes)
 		ret = append(ret, r...)
 		ret = append(ret, root)
 	}
 
 	if hasRight {
-		r := printState(right, root, level, indexes)
+		r := walkInBinaryTree(right, root, indexes)
 		ret = append(ret, r[0])
 	}
 
@@ -51,12 +75,6 @@ func printState(root int32, parentRoot int32, level int32, indexes [][]int32) []
 	}
 
 	return ret
-}
-
-func debug(s ...interface{}) {
-	if false {
-		fmt.Println(s...)
-	}
 }
 
 func main() {
